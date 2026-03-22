@@ -5,10 +5,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![RHEL 10.1](https://img.shields.io/badge/RHEL-10.1-red.svg)](https://www.redhat.com)
-[![SELinux](https://img.shields.io/badge/SELinux-enforcing-green.svg)]()
-[![CIS Level 1](https://img.shields.io/badge/CIS-Level%201%2095%25-blue.svg)]()
-[![Cockpit](https://img.shields.io/badge/Cockpit-9090-orange.svg)]()
-[![seccomp](https://img.shields.io/badge/seccomp-strict-purple.svg)]()
+[![SELinux](https://img.shields.io/badge/SELinux-enforcing-green.svg)](https://selinuxproject.org/)
+[![CIS Level 1](https://img.shields.io/badge/CIS-Level%201%2095%25-blue.svg)](https://blog.scalefusion.com/fr/cis-niveau-1-vs-cis-niveau-2/#cis-level-1-benchmarks-explained)
+[![Cockpit](https://img.shields.io/badge/Cockpit-9090-orange.svg)](https://cockpit-project.org/)
+[![seccomp](https://img.shields.io/badge/seccomp-strict-purple.svg)](https://manned.org/seccomp.2)
 
 ---
 
@@ -47,7 +47,7 @@ atteignant un niveau de sécurité objectivement supérieur à celui décrit dan
 ### Ce que contient ce dépôt
 
 | Fichier | Rôle |
-|---|---|
+| - | - |
 | `rhel-ultra-hardening.sh` | Script de durcissement en 7 phases |
 | `README.md` | Réfutation argumentée section par section |
 | `LICENSE` | MIT |
@@ -57,12 +57,12 @@ atteignant un niveau de sécurité objectivement supérieur à celui décrit dan
 
 ## 2. Intro — "Not designed with security in mind"
 
-### Citation de l'article
+### Citation de l'article n°1
 
 > _"OpenBSD was not designed with security in mind — it was designed around
 > the concept of correctness, which is a fundamentally different goal."_
 
-### Analyse critique
+### Analyse critique n°1
 
 L'auteur oppose "correctness" (correction du code) à "security" (sécurité système),
 suggérant que OpenBSD confond les deux. C'est une distinction réelle : un système
@@ -76,12 +76,13 @@ Contrairement à une approche "correctness", FLASK assume que **des bugs exister
 et construit un cadre de confinement indépendant du code applicatif.
 
 | Dimension | OpenBSD (2010) | RHEL 10.1 |
-|---|---|---|
+| - | - | - |
 | Modèle de sécurité | Réduction de la surface + code correct | MAC/FLASK + défense en profondeur |
 | Hypothèse de base | "Écrire du code sans bugs" | "Les bugs existent — les confiner" |
 | Architecture MAC | Non (avant OpenBSD 5.x pledge/unveil) | SELinux TE + MCS + svirt |
 | Audit formel | Non | CC EAL4+ (RHEL 7+), FIPS 140-3 |
 | Vérification | Revue manuelle | SELinux policy + setools + formal TE |
+
 ```bash
 # Vérifier l'architecture SELinux FLASK sur RHEL
 sestatus -v
@@ -104,14 +105,14 @@ première, non comme propriété émergente du code correct.
 
 ## 3. § Secure by Default — "Only two remote holes"
 
-### Citation de l'article
+### Citation de l'article n°2
 
 > _"Only two remote holes in the default install, in a long time!"
 > This is presented as a great achievement, yet it says nothing about
 > local privilege escalation, application-layer vulnerabilities, or
 > post-compromise resilience."_
 
-### Analyse critique
+### Analyse critique n°2
 
 L'auteur a raison sur un point fondamental : compter les trous distants
 ne mesure pas la sécurité globale. Un attaquant qui obtient un accès
@@ -128,12 +129,13 @@ RHEL 10.1 applique par défaut (et notre script renforce) :
 4. **FIPS 140-3** pour toutes les primitives cryptographiques
 
 | Métrique | OpenBSD (vision article) | RHEL 10.1 valorisa |
-|---|---|---|
+| - | - | - |
 | Trous distants par défaut | "Deux" (affiché comme succès) | Surface réduite par nftables DROP |
 | Escalade locale | Non adressée | SELinux strict + NoNewPrivileges |
 | Post-compromission | DAC uniquement | SELinux type enforcement = confinement |
 | Conformité formelle | Non certifiée CC | CC EAL4+ / FIPS 140-3 / STIG |
 | Audit de conformité | Manuel | `oscap` + OpenSCAP automatisé |
+
 ```bash
 # Mesurer la conformité CIS Level 1 avec OpenSCAP
 dnf install -y openscap-scanner scap-security-guide
@@ -142,6 +144,7 @@ oscap xccdf eval \
   --report /tmp/cis-report.html \
   /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml
 ```
+
 ```bash
 # Vérifier la politique nftables DROP-by-default
 nft list ruleset | grep "policy drop"
@@ -155,14 +158,14 @@ post-exploitation est indispensable. RHEL 10.1 fait les deux simultanément.
 
 ## 4. § Philosophy — "sendmail/BIND atrocious"
 
-### Citation de l'article
+### Citation de l'article n°3
 
 > _"The OpenBSD philosophy is to dismiss vulnerabilities as 'not a real issue'
 > or 'already mitigated'. The inclusion of sendmail and BIND in base installs
 > is atrocious from a security perspective — both have histories of critical
 > remote vulnerabilities."_
 
-### Analyse critique
+### Analyse critique n°3
 
 Cette critique est historiquement fondée : sendmail et BIND ont été
 la source de dizaines de CVE critiques entre 1988 et 2010.
@@ -181,12 +184,13 @@ Notre approche :
    namespaces systemd (`PrivateTmp`, `ProtectSystem=strict`).
 
 | Service | OpenBSD base (2010) | RHEL 10.1 valorisa |
-|---|---|---|
+| - | - | - |
 | MTA | sendmail (CVE historiques) | Postfix (chroot interne, moindre privilège) |
 | DNS | BIND (surface large) | dnsmasq (résolveur minimal, DNSSEC) |
 | Isolation | chroot UNIX basique | Namespaces systemd + SELinux type |
 | Exposition réseau | Port 25/53 ouverts | loopback-only / filtré nftables |
 | Historique CVE | BIND : 200+ CVE | dnsmasq : surface 10x réduite |
+
 ```bash
 # Vérifier que Postfix écoute uniquement sur loopback
 postconf inet_interfaces
@@ -198,6 +202,7 @@ systemctl show postfix | grep -E 'PrivateTmp|ProtectSystem|NoNewPrivileges'
 # ProtectSystem=full
 # NoNewPrivileges=yes
 ```
+
 ```bash
 # dnsmasq avec DNSSEC activé
 dig @127.0.0.1 dnssec-failed.org | grep -E 'SERVFAIL|status'
@@ -211,15 +216,16 @@ namespaces systemd et à SELinux, résout exactement le problème que l'auteur s
 
 ## 5. § No Lockdown — "chroot insufficient"
 
-### Citation de l'article
+### Citation de l'article n°4
 
 > _"There is no sufficient way to restrict access to resources in OpenBSD.
 > chroot() is insufficient — it can be escaped. systrace was removed.
 > securelevels are a joke compared to what Linux offers."_
 
-### Analyse critique
+### Analyse critique n°4
 
 L'auteur identifie trois mécanismes OpenBSD et les trouve insuffisants :
+
 - `chroot()` : escapes connus (via descripteurs de fichiers ouverts, etc.)
 - `systrace` : retiré d'OpenBSD en 2011 (preuve que l'auteur avait raison)
 - `securelevels` : protection kernel limitée à l'immutabilité des flags
@@ -227,7 +233,8 @@ L'auteur identifie trois mécanismes OpenBSD et les trouve insuffisants :
 ### Réponse valorisa — svirt MCS + seccomp + namespaces Linux
 
 Linux offre une pile de confinement multi-couche sans équivalent :
-```
+
+```text
 ┌─────────────────────────────────────────┐
 │         Application (httpd, qemu…)      │
 ├─────────────────────────────────────────┤
@@ -248,13 +255,14 @@ catégorie MCS unique à chaque VM KVM, de sorte qu'une VM compromise
 ne peut **jamais** accéder aux fichiers d'une autre VM — même en root.
 
 | Mécanisme | OpenBSD (2010) | RHEL 10.1 |
-|---|---|---|
+| - | - | - |
 | chroot | Oui (escapable) | PrivateTmp + ProtectSystem (namespaces) |
 | Filtrage syscalls | systrace (retiré 2011) | seccomp BPF (kernel 3.5+, kernel 6.x) |
 | Isolation VM | Non | svirt MCS (catégorie unique/VM) |
 | Capabilities | Non (root binaire) | CapabilityBoundingSet granulaire |
 | Namespaces | Non | pid/net/mnt/user/uts/ipc |
 | cgroups | Non | cgroups v2 + systemd-resource |
+
 ```bash
 # Vérifier l'étiquette svirt d'une VM KVM
 virsh dominfo myvm | grep -i security
@@ -266,6 +274,7 @@ virsh dominfo myvm | grep -i security
 cat /proc/$(pgrep sshd | head -1)/status | grep Seccomp
 # Seccomp: 2  (2 = strict filter BPF actif)
 ```
+
 ```bash
 # Tester qu'un process confiné ne peut pas appeler un syscall interdit
 # (exemple avec strace sur un process sous seccomp)
@@ -282,13 +291,13 @@ La pile de confinement Linux 2024 n'a **aucun équivalent** dans OpenBSD 2010.
 
 ## 6. § EAC Need — "DAC only, game over"
 
-### Citation de l'article
+### Citation de l'article n°5
 
 > _"OpenBSD relies on standard UNIX permissions, which are insufficient.
 > Once root is obtained, it is game over — there is no Mandatory Access Control,
 > no RBAC, nothing to limit what root can do."_
 
-### Analyse critique
+### Analyse critique n°5
 
 C'est la critique la plus fondamentalement correcte de tout l'article.
 DAC (Discretionary Access Control) signifie que le _propriétaire_ d'une ressource
@@ -315,21 +324,22 @@ SELinux implémente un **MAC complet** basé sur le modèle FLASK/TE :
 Root Linux classique :          Root sous SELinux strict :
 ┌──────────────────────┐        ┌──────────────────────────────────┐
 │ root = TOUT          │        │ root (sysadm_t:s0)               │
-│ - /etc/shadow ✓      │        │ - /etc/shadow : AVC denied ✓    │
-│ - /proc/kcore  ✓     │        │ - /proc/kcore : AVC denied ✓    │
+│ - /etc/shadow ✓      │        │ - /etc/shadow : AVC denied ✓     │
+│ - /proc/kcore  ✓     │        │ - /proc/kcore : AVC denied ✓     │
 │ - Kernel modules ✓   │        │ - insmod : AVC denied (si policy)│
 │ - Réseau arbitraire ✓│        │ - bind(0.0.0.0:443) : AVC denied │
 └──────────────────────┘        └──────────────────────────────────┘
 ```
 
 | Contrôle | DAC seul (OpenBSD 2010) | MAC SELinux (RHEL 10.1) |
-|---|---|---|
+| - | - | - |
 | Root omnipotent | Oui (game over) | Non — SELinux confine root |
 | Accès /etc/shadow par root | Toujours | Selon politique TE |
 | Insmod par root | Toujours | `kernel_module_t` requis |
 | Bind port < 1024 | Via `CAP_NET_BIND_SERVICE` | + SELinux `name_bind` permission |
 | Lecture logs autres users | Toujours | Type séparé par `user_home_t` |
 | Persistance compromission | Totale | Limitée au domaine du process |
+
 ```bash
 # Démontrer que SELinux confine root
 # En tant que root, tentative d'accès à un fichier hors politique :
@@ -341,6 +351,7 @@ runcon -t httpd_t -- cat /etc/shadow
 seinfo -r | grep -E 'sysadm|staff|user'
 # Rôles disponibles : sysadm_r, staff_r, user_r, system_r
 ```
+
 ```bash
 # Afficher la politique TE pour sshd
 sesearch --allow -s sshd_t | wc -l
@@ -358,12 +369,12 @@ La démonstration ci-dessus prouve que **root lui-même est confiné** par SELin
 
 ## 7. § Complexity — "SELinux formally verified"
 
-### Citation de l'article
+### Citation de l'article n°6
 
 > _"SELinux and RSBAC implement formally verified security models.
 > This is not naïve at best and arrogant at worst — this is engineering."_
 
-### Analyse critique
+### Analyse critique n°6
 
 L'auteur salue SELinux et RSBAC comme exemples de rigueur formelle —
 contrastant avec l'approche OpenBSD qu'il juge empirique et non formalisée.
@@ -372,9 +383,11 @@ Cette section est la moins critique de OpenBSD et la plus favorable à Linux.
 ### Réponse valorisa — SELinux TE + setools + setroubleshoot
 
 Le modèle FLASK/TE de SELinux repose sur des travaux académiques formels :
+
 - _"The Flask Security Architecture"_ (Spencer et al., USENIX Security 1999)
 - Modèle _Bell-LaPadula_ (confidentialité) + _Biba_ (intégrité) intégrés
 - Politique compilée et vérifiable avec `setools` / `apol`
+
 ```bash
 # Analyser la politique SELinux formellement
 seinfo --stats
@@ -397,13 +410,14 @@ sesearch --allow -t shadow_t -p write
 ```
 
 | Propriété formelle | OpenBSD (2010) | RHEL 10.1 SELinux |
-|---|---|---|
+| - | - | - |
 | Modèle de politique | Non (empirique) | FLASK TE + Bell-LaPadula |
 | Vérification formelle | Non | setools / apol (analyse statique) |
 | Politique compilée | N/A | checkpolicy + semodule |
 | Audit trail formel | syslog basique | auditd + AVC structurés |
 | Certification | Non | CC EAL4+ (RHEL 7+) |
 | Conformité gouvernementale | Partielle | DISA STIG + NIST 800-53 |
+
 ```bash
 # setroubleshoot : explication en langage naturel des violations AVC
 sealert -l "*" | grep -A5 "was denied"
@@ -441,7 +455,7 @@ un RHEL 10.1 correctement configuré répond à **chacune** des critiques de l'a
 avec des mécanismes formellement vérifiables, certifiés et maintenus industriellement.
 
 | Section article | Critique | Réponse RHEL 10.1 | Mécanisme |
-|---|---|---|---|
+| - | - | - | - |
 | Intro | "Not designed for security" | Conçu autour FLASK/TE | SELinux enforcing |
 | Default | "2 remote holes insuffisant" | Surface DROP + CIS 95% | nftables + OpenSCAP |
 | Philosophy | "sendmail/BIND atrocious" | Postfix + dnsmasq | Namespaces systemd |
@@ -453,6 +467,7 @@ avec des mécanismes formellement vérifiables, certifiés et maintenus industri
 ---
 
 ## 9. Architecture globale
+
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                    RHEL 10.1 — valorisa                         │
@@ -485,7 +500,7 @@ avec des mécanismes formellement vérifiables, certifiés et maintenus industri
 ### Prérequis système
 
 | Composant | Version minimale |
-|---|---|
+| - | - |
 | OS | RHEL 10.1 / Oracle Linux 9.5+ |
 | Kernel | 5.14+ (recommandé 6.x) |
 | RAM | 2 GB minimum |
@@ -493,6 +508,7 @@ avec des mécanismes formellement vérifiables, certifiés et maintenus industri
 | Accès | root ou sudo complet |
 
 ### RHEL Developer (gratuit)
+
 ```bash
 # Inscription gratuite : https://developers.redhat.com/
 # Red Hat Developer Subscription = RHEL gratuit pour usage individuel
@@ -501,6 +517,7 @@ subscription-manager attach --auto
 ```
 
 ### Installation Oracle Linux 9.5 (alternative 100% gratuite)
+
 ```bash
 # Oracle Linux 9.5 = RHEL compatible, gratuit, sans subscription
 # https://yum.oracle.com/oracle-linux-isos.html
@@ -508,6 +525,7 @@ subscription-manager attach --auto
 ```
 
 ### Exécution du script
+
 ```bash
 # 1. Cloner le dépôt
 git clone https://github.com/valorisa/rhel-ultra-hardening-proof-of-concept.git
@@ -527,6 +545,7 @@ sudo tail -f /var/log/valorisa-hardening-*.log
 ```
 
 ### Vérification post-installation
+
 ```bash
 # SELinux enforcing
 getenforce
@@ -552,6 +571,7 @@ firefox /tmp/cis-report.html
 Cockpit est l'interface d'administration web de RHEL, intégrée et sécurisée par SELinux.
 Il démontre qu'un système ultra-durci reste _administrable_ — réfutant l'argument
 "la sécurité rend le système inutilisable".
+
 ```bash
 # Accès Cockpit
 https://VOTRE_IP:9090
@@ -568,7 +588,7 @@ https://VOTRE_IP:9090
 ```
 
 | Fonctionnalité Cockpit | Sécurité |
-|---|---|
+| - | - |
 | Authentification | PAM + MFA possible |
 | Transport | TLS 1.3 uniquement |
 | Session | Cookie signé + timeout |
@@ -583,7 +603,7 @@ https://VOTRE_IP:9090
 ### OpenBSD 2010 vs RHEL 10.1 — Vision globale
 
 | Critère | OpenBSD (2010, vision article) | RHEL 10.1 valorisa | Verdict |
-|---|---|---|---|
+| - | - | - | - |
 | Modèle de contrôle | DAC (UNIX permissions) | MAC (SELinux TE/MCS/MLS) | RHEL ✔ |
 | Confinement post-root | Non (game over) | Oui (SELinux strict) | RHEL ✔ |
 | Isolation processus | chroot (escapable) | Namespaces + svirt + seccomp | RHEL ✔ |
@@ -606,20 +626,20 @@ https://VOTRE_IP:9090
 ## 13. Références
 
 | Référence | Lien |
-|---|---|
+| - | - |
 | Article réfuté | _"The Insecurity of OpenBSD"_ (2010) — All that is wrong with the world |
 | SELinux FLASK Architecture | Spencer et al., USENIX Security 1999 |
-| RHEL 10 Security Guide | https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10 |
-| CIS RHEL 9 Benchmark | https://www.cisecurity.org/benchmark/red_hat_linux |
-| OpenSCAP | https://www.open-scap.org |
-| DISA STIG RHEL | https://public.cyber.mil/stigs |
-| SELinux Notebook | https://github.com/SELinuxProject/selinux-notebook |
-| seccomp BPF | https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html |
-| svirt | https://selinuxproject.org/page/SVirt |
-| Cockpit Project | https://cockpit-project.org |
-| FIPS 140-3 RHEL | https://access.redhat.com/articles/2918071 |
-| CC EAL4+ RHEL | https://www.commoncriteriaportal.org |
-| Oracle Linux 9.5 | https://yum.oracle.com/oracle-linux-isos.html |
+| RHEL 10 Security Guide | <https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10> |
+| CIS RHEL 9 Benchmark | <https://www.cisecurity.org/benchmark/red_hat_linux> |
+| OpenSCAP | <https://www.open-scap.org> |
+| DISA STIG RHEL | <https://public.cyber.mil/stigs> |
+| SELinux Notebook | <https://github.com/SELinuxProject/selinux-notebook> |
+| seccomp BPF | <https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html> |
+| svirt | <https://selinuxproject.org/page/SVirt> |
+| Cockpit Project | <https://cockpit-project.org> |
+| FIPS 140-3 RHEL | <https://access.redhat.com/articles/2918071> |
+| CC EAL4+ RHEL | <https://www.commoncriteriaportal.org> |
+| Oracle Linux 9.5 | <https://yum.oracle.com/oracle-linux-isos.html> |
 
 ---
 
@@ -634,5 +654,5 @@ GitHub : [@valorisa](https://github.com/valorisa)
 
 ---
 
-*Licence MIT — Voir [LICENSE](LICENSE)*  
-*Testé sur RHEL 10.1 et Oracle Linux 9.5*
+_Licence MIT — Voir [LICENSE](LICENSE)*  
+_Testé sur RHEL 10.1 et Oracle Linux 9.5*
