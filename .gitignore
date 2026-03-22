@@ -1,0 +1,49 @@
+# Logs hardening
+/var/log/valorisa-*.log
+*.log
+
+# Rapports OpenSCAP
+*.html
+*.xml
+!scap/**/*.xml
+
+# Backups config
+*.bak
+*.bak.*
+
+# Clés SSH générées
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+!*.pub
+
+# Secrets
+.env
+.env.*
+secrets/
+vault/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python (outils d'audit éventuels)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Temporaires
+tmp/
+temp/
+/tmp/
