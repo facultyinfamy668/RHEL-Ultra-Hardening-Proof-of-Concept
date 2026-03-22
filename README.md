@@ -15,7 +15,7 @@
 ## Table des matières
 
 1. [Contexte & Objectif](#1-contexte--objectif)
-2. [ Intro — "Not designed with security in mind"](#2--intro----not-designed-with-security-in-mind)
+2. [Intro — "Not designed with security in mind"](#2--intro----not-designed-with-security-in-mind)
 3. [§ Secure by Default — "Only two remote holes"](#3--secure-by-default----only-two-remote-holes)
 4. [§ Philosophy — "sendmail/BIND atrocious"](#4--philosophy----sendmailbind-atrocious)
 5. [§ No Lockdown — "chroot insufficient"](#5--no-lockdown----chroot-insufficient)
